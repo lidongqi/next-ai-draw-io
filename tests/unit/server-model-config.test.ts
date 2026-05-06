@@ -168,4 +168,32 @@ describe("loadFlattenedServerModels", () => {
         expect(models.length).toBe(1)
         expect(models[0].apiKeyEnv).toEqual(["OPENAI_KEY_1", "OPENAI_KEY_2"])
     })
+
+    it("accepts model objects with supportsImage", async () => {
+        const config = {
+            providers: [
+                {
+                    name: "OpenAI Server",
+                    provider: "openai",
+                    models: [
+                        "gpt-4o",
+                        { id: "gpt-4o-mini", supportsImage: false },
+                        { id: "custom-vision-model", supportsImage: true },
+                    ],
+                },
+            ],
+        }
+        process.env.AI_MODELS_CONFIG = JSON.stringify(config)
+        process.env.AI_MODELS_CONFIG_PATH = ""
+
+        const models = await loadFlattenedServerModels()
+
+        expect(models.length).toBe(3)
+        expect(models[0].modelId).toBe("gpt-4o")
+        expect(models[0].supportsImage).toBeUndefined()
+        expect(models[1].modelId).toBe("gpt-4o-mini")
+        expect(models[1].supportsImage).toBe(false)
+        expect(models[2].modelId).toBe("custom-vision-model")
+        expect(models[2].supportsImage).toBe(true)
+    })
 })

@@ -208,6 +208,7 @@ export function useModelConfig(): UseModelConfigReturn {
             awsRegion: undefined,
             awsSessionToken: undefined,
             validated: true,
+            supportsImage: m.supportsImage,
             source: "server" as const,
             isDefault: m.isDefault,
             apiKeyEnv: m.apiKeyEnv,
@@ -377,15 +378,13 @@ export function getSelectedAIConfig(): {
     aiBaseUrl: string
     aiApiKey: string
     aiModel: string
-    // AWS Bedrock credentials
     awsAccessKeyId: string
     awsSecretAccessKey: string
     awsRegion: string
     awsSessionToken: string
-    // Selected model ID (for server model lookup)
     selectedModelId: string
-    // Vertex AI credentials (Express Mode)
     vertexApiKey: string
+    supportsImage?: boolean
 } {
     const empty = {
         accessCode: "",
@@ -448,8 +447,6 @@ export function getSelectedAIConfig(): {
         return {
             ...empty,
             accessCode,
-            // Note: nameSlug is NOT the provider, but we send it for backwards compat
-            // Server uses selectedModelId to lookup the actual provider
             aiProvider: nameSlug,
             aiBaseUrl: "",
             aiApiKey: "",
@@ -470,13 +467,12 @@ export function getSelectedAIConfig(): {
         aiBaseUrl: model.baseUrl || "",
         aiApiKey: model.apiKey,
         aiModel: model.modelId,
-        // AWS Bedrock credentials
         awsAccessKeyId: model.awsAccessKeyId || "",
         awsSecretAccessKey: model.awsSecretAccessKey || "",
         awsRegion: model.awsRegion || "",
         awsSessionToken: model.awsSessionToken || "",
         selectedModelId: config.selectedModelId || "",
-        // Vertex AI credentials (Express Mode)
         vertexApiKey: model.vertexApiKey || "",
+        supportsImage: model.supportsImage,
     }
 }

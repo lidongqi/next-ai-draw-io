@@ -400,6 +400,8 @@
         "showUnvalidatedModels": "顯示未驗證的模型",
         "allModelsShown": "顯示所有模型（包括未驗證的）",
         "unvalidatedModelWarning": "此模型尚未驗證",
-        "serverDefaultModel": "伺服器預設模型"
+        "serverDefaultModel": "伺服器預設模型",
+        "supportsImage": "圖片輸入",
+        "supportsImageTooltip": "如果此模型支援圖片/視覺輸入，請開啟。關閉時使用啟發式檢測。"
     }
 }

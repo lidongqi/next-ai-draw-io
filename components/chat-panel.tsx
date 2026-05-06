@@ -1104,6 +1104,11 @@ export default function ChatPanel({
                     ...(config.selectedModelId && {
                         "x-selected-model-id": config.selectedModelId,
                     }),
+                    ...(config.supportsImage !== undefined && {
+                        "x-supports-image": config.supportsImage
+                            ? "true"
+                            : "false",
+                    }),
                     ...(minimalStyle && {
                         "x-minimal-style": "true",
                     }),

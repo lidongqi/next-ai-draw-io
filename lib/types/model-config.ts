@@ -27,8 +27,9 @@ export type ProviderName =
 export interface ModelConfig {
     id: string // UUID for this model
     modelId: string // e.g., "gpt-4o", "claude-sonnet-4-5"
-    validated?: boolean // Has this model been validated
-    validationError?: string // Error message if validation failed
+    validated?: boolean
+    validationError?: string
+    supportsImage?: boolean
 }
 
 // Provider configuration
@@ -75,6 +76,7 @@ export interface FlattenedModel {
     vertexApiKey?: string // Express Mode API key
 
     validated?: boolean // Has this model been validated
+    supportsImage?: boolean
     // Source of this model config: user-defined (client) or server-defined
     source?: "user" | "server"
     // Whether this model is the server default (matches AI_MODEL env var)
@@ -424,6 +426,7 @@ export function flattenModels(config: MultiModelConfig): FlattenedModel[] {
                 vertexApiKey: provider.vertexApiKey,
 
                 validated: model.validated,
+                supportsImage: model.supportsImage,
                 source: "user",
                 isDefault: false,
             })

@@ -195,6 +195,7 @@ async function handleChatRequest(req: Request): Promise<Response> {
         apiKeyEnv?: string | string[]
         baseUrlEnv?: string
         provider?: string
+        supportsImage?: boolean
     } = {}
     if (selectedModelId?.startsWith("server:")) {
         const serverModel = await findServerModelById(selectedModelId)
@@ -205,8 +206,8 @@ async function handleChatRequest(req: Request): Promise<Response> {
             serverModelConfig = {
                 apiKeyEnv: serverModel.apiKeyEnv,
                 baseUrlEnv: serverModel.baseUrlEnv,
-                // Use actual provider from config (client header may have incorrect value due to ID format change)
                 provider: serverModel.provider,
+                supportsImage: serverModel.supportsImage,
             }
         }
     }
@@ -268,7 +269,16 @@ async function handleChatRequest(req: Request): Promise<Response> {
 
     // Check if user is sending images to a model that doesn't support them
     // AI SDK silently drops unsupported parts, so we need to catch this early
-    if (fileParts.length > 0 && !supportsImageInput(modelId)) {
+    // Priority: 1) explicit config from client header, 2) server model config, 3) heuristic detection
+    const supportsImageHeader = req.headers.get("x-supports-image")
+    const supportsImageOverride =
+        supportsImageHeader !== null
+            ? supportsImageHeader === "true"
+            : serverModelConfig.supportsImage
+    if (
+        fileParts.length > 0 &&
+        !supportsImageInput(modelId, supportsImageOverride)
+    ) {
         return Response.json(
             {
                 error: `The model "${modelId}" does not support image input. Please use a vision-capable model (e.g., GPT-4o, Claude, Gemini) or remove the image.`,

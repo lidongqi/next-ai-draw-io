@@ -13,7 +13,15 @@ export const ProviderNameSchema: z.ZodType<ProviderName> = z
 export const ServerProviderSchema = z.object({
     name: z.string().min(1),
     provider: ProviderNameSchema,
-    models: z.array(z.string().min(1)),
+    models: z.array(
+        z.union([
+            z.string().min(1),
+            z.object({
+                id: z.string().min(1),
+                supportsImage: z.boolean().optional(),
+            }),
+        ]),
+    ),
     // Optional: custom environment variable name(s) for API key
     // Can be a single string or array of strings for load balancing
     // e.g., "OPENAI_API_KEY_TEAM_A" or ["OPENAI_KEY_1", "OPENAI_KEY_2"]
@@ -39,6 +47,7 @@ export interface FlattenedServerModel {
     provider: ProviderName
     providerLabel: string
     isDefault: boolean
+    supportsImage?: boolean
     // Custom env var name(s) for API key (optional)
     // Can be a single string or array of strings for load balancing
     apiKeyEnv?: string | string[]
@@ -114,14 +123,22 @@ export async function loadFlattenedServerModels(): Promise<
         // Use slugified name for unique ID (supports multiple API keys per provider)
         const nameSlug = slugify(p.name)
 
-        for (const modelId of p.models) {
+        for (const modelEntry of p.models) {
+            const modelId =
+                typeof modelEntry === "string" ? modelEntry : modelEntry.id
+            const modelSupportsImage =
+                typeof modelEntry === "string"
+                    ? undefined
+                    : modelEntry.supportsImage
             const id = `server:${nameSlug}:${modelId}`
 
             // Default model priority:
             // 1. From ai-models.json: first model of provider with default: true
             // 2. From env vars: AI_MODEL matches (legacy behavior)
+            const firstModelId =
+                typeof p.models[0] === "string" ? p.models[0] : p.models[0].id
             const isDefault =
-                (p.default === true && modelId === p.models[0]) ||
+                (p.default === true && modelId === firstModelId) ||
                 (!!defaultModelId &&
                     modelId === defaultModelId &&
                     (!defaultProvider || defaultProvider === p.provider))
@@ -132,6 +149,7 @@ export async function loadFlattenedServerModels(): Promise<
                 provider: p.provider,
                 providerLabel,
                 isDefault,
+                supportsImage: modelSupportsImage,
                 apiKeyEnv: p.apiKeyEnv,
                 baseUrlEnv: p.baseUrlEnv,
             })

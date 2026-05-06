@@ -8,6 +8,7 @@ import {
     Cloud,
     Eye,
     EyeOff,
+    ImageIcon,
     Key,
     Link2,
     Loader2,
@@ -53,6 +54,7 @@ import { Switch } from "@/components/ui/switch"
 import { useDictionary } from "@/hooks/use-dictionary"
 import type { UseModelConfigReturn } from "@/hooks/use-model-config"
 import { formatMessage } from "@/lib/i18n/utils"
+import { supportsImageInput } from "@/lib/model-capabilities"
 import type { ProviderConfig, ProviderName } from "@/lib/types/model-config"
 import {
     PROVIDER_INFO,
@@ -1598,19 +1600,63 @@ export function ModelConfigDialog({
                                                                         }}
                                                                         className="flex-1 min-w-0 font-mono text-sm h-8 border-0 bg-transparent focus-visible:bg-background focus-visible:ring-1"
                                                                     />
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="icon"
-                                                                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                                                                        onClick={() =>
-                                                                            handleDeleteModel(
-                                                                                model.id,
-                                                                            )
-                                                                        }
-                                                                        aria-label={`Delete ${model.modelId}`}
-                                                                    >
-                                                                        <X className="h-4 w-4" />
-                                                                    </Button>
+                                                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                                                        <div
+                                                                            className="flex items-center gap-1.5"
+                                                                            title={
+                                                                                dict
+                                                                                    .modelConfig
+                                                                                    .supportsImageTooltip
+                                                                            }
+                                                                        >
+                                                                            <ImageIcon className="h-3 w-3 text-muted-foreground" />
+                                                                            <Switch
+                                                                                checked={
+                                                                                    model.supportsImage ??
+                                                                                    supportsImageInput(
+                                                                                        model.modelId,
+                                                                                    )
+                                                                                }
+                                                                                onCheckedChange={(
+                                                                                    checked,
+                                                                                ) => {
+                                                                                    const heuristicDefault =
+                                                                                        supportsImageInput(
+                                                                                            model.modelId,
+                                                                                        )
+                                                                                    if (
+                                                                                        selectedProviderId
+                                                                                    ) {
+                                                                                        updateModel(
+                                                                                            selectedProviderId,
+                                                                                            model.id,
+                                                                                            {
+                                                                                                supportsImage:
+                                                                                                    checked ===
+                                                                                                    heuristicDefault
+                                                                                                        ? undefined
+                                                                                                        : checked,
+                                                                                            },
+                                                                                        )
+                                                                                    }
+                                                                                }}
+                                                                                className="scale-75"
+                                                                            />
+                                                                        </div>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                                                            onClick={() =>
+                                                                                handleDeleteModel(
+                                                                                    model.id,
+                                                                                )
+                                                                            }
+                                                                            aria-label={`Delete ${model.modelId}`}
+                                                                        >
+                                                                            <X className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </div>
                                                                 </div>
                                                                 {/* Show validation error inline */}
                                                                 {model.validated ===

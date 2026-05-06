@@ -235,6 +235,18 @@ describe("supportsImageInput", () => {
         expect(supportsImageInput("gpt-4o")).toBe(true)
         expect(supportsImageInput("gemini-pro")).toBe(true)
     })
+
+    it("returns override value when supportsImage is explicitly set", () => {
+        expect(supportsImageInput("gpt-4o", true)).toBe(true)
+        expect(supportsImageInput("gpt-4o", false)).toBe(false)
+        expect(supportsImageInput("deepseek-chat", true)).toBe(true)
+        expect(supportsImageInput("deepseek-chat", false)).toBe(false)
+    })
+
+    it("falls back to heuristic when supportsImage is undefined", () => {
+        expect(supportsImageInput("gpt-4o", undefined)).toBe(true)
+        expect(supportsImageInput("deepseek-chat", undefined)).toBe(false)
+    })
 })
 
 vi.mock("ollama-ai-provider-v2", () => {

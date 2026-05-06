@@ -354,7 +354,9 @@
         "showUnvalidatedModels": "未検証のモデルを表示",
         "allModelsShown": "すべてのモデルを表示（未検証を含む）",
         "unvalidatedModelWarning": "このモデルは検証されていません",
-        "serverDefaultModel": "サーバーデフォルトモデル"
+        "serverDefaultModel": "サーバーデフォルトモデル",
+        "supportsImage": "画像入力",
+        "supportsImageTooltip": "このモデルが画像/ビジョン入力をサポートする場合に有効にしてください。オフの場合はヒューリスティック検出が使用されます。"
     },
     "templates": {
         "title": "マイテンプレート",
