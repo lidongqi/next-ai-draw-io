@@ -28,6 +28,8 @@ export function supportsImageInput(
         (lowerModelId.includes("kimi-k2") ||
             lowerModelId.includes("kimi_k2")) &&
         !hasVisionIndicator &&
+        !lowerModelId.includes("2.5") &&
+        !lowerModelId.includes("k2.5") &&
         !lowerModelId.includes("2.6") &&
         !lowerModelId.includes("k2.6")
     ) {
