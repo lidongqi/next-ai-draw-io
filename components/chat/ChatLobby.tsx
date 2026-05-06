@@ -4,6 +4,7 @@ import {
     ChevronDown,
     ChevronUp,
     MessageSquare,
+    Pencil,
     Search,
     Trash2,
     X,
@@ -36,6 +37,7 @@ interface ChatLobbyProps {
     sessions: SessionMetadata[]
     onSelectSession: (id: string) => void
     onDeleteSession?: (id: string) => void
+    onRenameSession?: (id: string, title: string) => void
     setInput: (input: string) => void
     setFiles: (files: File[]) => void
     onSendTemplate?: (template: Template) => void
@@ -48,6 +50,7 @@ interface ChatLobbyProps {
             justNow?: string
             deleteTitle?: string
             deleteDescription?: string
+            renameTooltip?: string
         }
         templates?: {
             title?: string
@@ -101,6 +104,7 @@ export function ChatLobby({
     sessions,
     onSelectSession,
     onDeleteSession,
+    onRenameSession,
     setInput,
     setFiles,
     onSendTemplate,
@@ -113,6 +117,10 @@ export function ChatLobby({
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [sessionToDelete, setSessionToDelete] = useState<string | null>(null)
     const [searchQuery, setSearchQuery] = useState("")
+    const [editingSessionId, setEditingSessionId] = useState<string | null>(
+        null,
+    )
+    const [editingTitle, setEditingTitle] = useState("")
 
     // Listen for panel visibility changes from settings
     useEffect(() => {
@@ -185,66 +193,162 @@ export function ChatLobby({
                                     .toLowerCase()
                                     .includes(searchQuery.toLowerCase()),
                             )
-                            .map((session) => (
-                                // biome-ignore lint/a11y/useSemanticElements: Cannot use button - has nested delete button which causes hydration error
-                                <div
-                                    key={session.id}
-                                    role="button"
-                                    tabIndex={0}
-                                    className="group w-full flex items-center gap-3 p-3 rounded-xl border border-border/60 bg-card hover:bg-accent/50 hover:border-primary/30 transition-all duration-200 cursor-pointer text-left"
-                                    onClick={() => onSelectSession(session.id)}
-                                    onKeyDown={(e) => {
-                                        if (
-                                            e.key === "Enter" ||
-                                            e.key === " "
-                                        ) {
-                                            e.preventDefault()
-                                            onSelectSession(session.id)
-                                        }
-                                    }}
-                                >
-                                    {session.thumbnailDataUrl ? (
-                                        <div className="w-12 h-12 shrink-0 rounded-lg border bg-white overflow-hidden">
-                                            <Image
-                                                src={session.thumbnailDataUrl}
-                                                alt=""
-                                                width={48}
-                                                height={48}
-                                                className="object-contain w-full h-full"
-                                            />
+                            .map((session) => {
+                                const isEditing =
+                                    editingSessionId === session.id
+                                return (
+                                    // biome-ignore lint/a11y/useSemanticElements: Cannot use button - has nested interactive elements which causes hydration error
+                                    <div
+                                        key={session.id}
+                                        role="button"
+                                        tabIndex={0}
+                                        className="group w-full flex items-center gap-3 p-3 rounded-xl border border-border/60 bg-card hover:bg-accent/50 hover:border-primary/30 transition-all duration-200 cursor-pointer text-left"
+                                        onClick={() => {
+                                            if (!isEditing)
+                                                onSelectSession(session.id)
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (
+                                                (e.key === "Enter" ||
+                                                    e.key === " ") &&
+                                                !isEditing
+                                            ) {
+                                                e.preventDefault()
+                                                onSelectSession(session.id)
+                                            }
+                                        }}
+                                    >
+                                        {session.thumbnailDataUrl ? (
+                                            <div className="w-12 h-12 shrink-0 rounded-lg border bg-white overflow-hidden">
+                                                <Image
+                                                    src={
+                                                        session.thumbnailDataUrl
+                                                    }
+                                                    alt=""
+                                                    width={48}
+                                                    height={48}
+                                                    className="object-contain w-full h-full"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="w-12 h-12 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center">
+                                                <MessageSquare className="w-5 h-5 text-primary" />
+                                            </div>
+                                        )}
+                                        <div className="min-w-0 flex-1">
+                                            {isEditing ? (
+                                                <input
+                                                    type="text"
+                                                    value={editingTitle}
+                                                    onChange={(e) =>
+                                                        setEditingTitle(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    onKeyDown={(e) => {
+                                                        e.stopPropagation()
+                                                        if (e.key === "Enter") {
+                                                            const trimmed =
+                                                                editingTitle.trim()
+                                                            if (
+                                                                trimmed &&
+                                                                onRenameSession
+                                                            ) {
+                                                                onRenameSession(
+                                                                    session.id,
+                                                                    trimmed,
+                                                                )
+                                                            }
+                                                            setEditingSessionId(
+                                                                null,
+                                                            )
+                                                        } else if (
+                                                            e.key === "Escape"
+                                                        ) {
+                                                            setEditingSessionId(
+                                                                null,
+                                                            )
+                                                        }
+                                                    }}
+                                                    onBlur={() => {
+                                                        const trimmed =
+                                                            editingTitle.trim()
+                                                        if (
+                                                            trimmed &&
+                                                            onRenameSession
+                                                        ) {
+                                                            onRenameSession(
+                                                                session.id,
+                                                                trimmed,
+                                                            )
+                                                        }
+                                                        setEditingSessionId(
+                                                            null,
+                                                        )
+                                                    }}
+                                                    onClick={(e) =>
+                                                        e.stopPropagation()
+                                                    }
+                                                    className="w-full text-sm font-medium bg-background border border-primary rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                                                    autoFocus
+                                                />
+                                            ) : (
+                                                <div className="text-sm font-medium truncate">
+                                                    {session.title}
+                                                </div>
+                                            )}
+                                            <div className="text-xs text-muted-foreground">
+                                                {formatSessionDate(
+                                                    session.updatedAt,
+                                                    dict.sessionHistory,
+                                                )}
+                                            </div>
                                         </div>
-                                    ) : (
-                                        <div className="w-12 h-12 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center">
-                                            <MessageSquare className="w-5 h-5 text-primary" />
-                                        </div>
-                                    )}
-                                    <div className="min-w-0 flex-1">
-                                        <div className="text-sm font-medium truncate">
-                                            {session.title}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {formatSessionDate(
-                                                session.updatedAt,
-                                                dict.sessionHistory,
+                                        <div className="flex items-center gap-0.5 shrink-0">
+                                            {onRenameSession && !isEditing && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        setEditingSessionId(
+                                                            session.id,
+                                                        )
+                                                        setEditingTitle(
+                                                            session.title,
+                                                        )
+                                                    }}
+                                                    className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                                                    title={
+                                                        dict.sessionHistory
+                                                            ?.renameTooltip ||
+                                                        "Rename"
+                                                    }
+                                                >
+                                                    <Pencil className="w-3.5 h-3.5" />
+                                                </button>
+                                            )}
+                                            {onDeleteSession && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        setSessionToDelete(
+                                                            session.id,
+                                                        )
+                                                        setDeleteDialogOpen(
+                                                            true,
+                                                        )
+                                                    }}
+                                                    className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+                                                    title={dict.common.delete}
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
                                             )}
                                         </div>
                                     </div>
-                                    {onDeleteSession && (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                setSessionToDelete(session.id)
-                                                setDeleteDialogOpen(true)
-                                            }}
-                                            className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
-                                            title={dict.common.delete}
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    )}
-                                </div>
-                            ))}
+                                )
+                            })}
                         {sessions.filter((s) =>
                             s.title
                                 .toLowerCase()

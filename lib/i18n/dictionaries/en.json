@@ -268,7 +268,8 @@
         "recentChats": "Recent Chats",
         "justNow": "Just now",
         "searchPlaceholder": "Search chats...",
-        "noResults": "No chats found"
+        "noResults": "No chats found",
+        "renameTooltip": "Rename"
     },
     "templates": {
         "title": "My Templates",

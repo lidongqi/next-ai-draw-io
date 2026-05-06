@@ -268,7 +268,8 @@
         "recentChats": "最近對話",
         "justNow": "剛剛",
         "searchPlaceholder": "搜尋對話...",
-        "noResults": "未找到對話"
+        "noResults": "未找到對話",
+        "renameTooltip": "重新命名"
     },
     "templates": {
         "title": "我的範本",

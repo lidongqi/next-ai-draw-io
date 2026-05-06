@@ -925,6 +925,14 @@ export default function ChatPanel({
         [sessionManager, syncUIWithSession, router, pathname],
     )
 
+    const handleRenameSession = useCallback(
+        async (sessionId: string, title: string) => {
+            if (!sessionManager.isAvailable) return
+            await sessionManager.renameSession(sessionId, title)
+        },
+        [sessionManager],
+    )
+
     const handleNewChat = useCallback(async () => {
         // Save current session before creating new one
         if (sessionManager.isAvailable && messages.length > 0) {
@@ -1397,6 +1405,7 @@ export default function ChatPanel({
                     sessions={sessionManager.sessions}
                     onSelectSession={handleSelectSession}
                     onDeleteSession={handleDeleteSession}
+                    onRenameSession={handleRenameSession}
                     loadedMessageIdsRef={loadedMessageIdsRef}
                     validationStates={validationStates}
                     onImproveWithSuggestions={handleImproveWithSuggestions}

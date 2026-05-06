@@ -268,7 +268,8 @@
         "recentChats": "最近のチャット",
         "justNow": "たった今",
         "searchPlaceholder": "チャットを検索...",
-        "noResults": "チャットが見つかりません"
+        "noResults": "チャットが見つかりません",
+        "renameTooltip": "名前を変更"
     },
     "validation": {
         "title": "ダイアグラムを検証",

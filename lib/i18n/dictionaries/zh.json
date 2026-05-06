@@ -268,7 +268,8 @@
         "recentChats": "最近对话",
         "justNow": "刚刚",
         "searchPlaceholder": "搜索对话...",
-        "noResults": "未找到对话"
+        "noResults": "未找到对话",
+        "renameTooltip": "重命名"
     },
     "templates": {
         "title": "我的模板库",

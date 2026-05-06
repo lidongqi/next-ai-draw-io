@@ -14,6 +14,7 @@ import {
     type SessionMetadata,
     type StoredMessage,
     saveSession,
+    updateSessionTitle,
 } from "@/lib/session-storage"
 
 export interface SessionData {
@@ -42,6 +43,7 @@ export interface UseSessionManagerReturn {
     ) => Promise<void>
     refreshSessions: () => Promise<void>
     clearCurrentSession: () => void
+    renameSession: (id: string, title: string) => Promise<void>
 }
 
 interface UseSessionManagerOptions {
@@ -307,6 +309,23 @@ export function useSessionManager(
         setCurrentSessionId(null)
     }, [])
 
+    const renameSession = useCallback(
+        async (id: string, title: string) => {
+            const trimmed = title.trim()
+            if (!trimmed) return
+            await updateSessionTitle(id, trimmed)
+
+            if (id === currentSessionId && currentSession) {
+                setCurrentSession({ ...currentSession, title: trimmed })
+            }
+
+            setSessions((prev) =>
+                prev.map((s) => (s.id === id ? { ...s, title: trimmed } : s)),
+            )
+        },
+        [currentSessionId, currentSession],
+    )
+
     return {
         sessions,
         currentSessionId,
@@ -318,5 +337,6 @@ export function useSessionManager(
         saveCurrentSession,
         refreshSessions,
         clearCurrentSession,
+        renameSession,
     }
 }

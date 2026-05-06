@@ -279,6 +279,26 @@ export async function deleteOldestSession(): Promise<void> {
     }
 }
 
+export async function updateSessionTitle(
+    id: string,
+    title: string,
+): Promise<boolean> {
+    if (!isIndexedDBAvailable()) return false
+    try {
+        return await withDB(async (db) => {
+            const session = await db.get(STORE_NAME, id)
+            if (!session) return false
+            session.title = title
+            session.updatedAt = Date.now()
+            await db.put(STORE_NAME, session)
+            return true
+        })
+    } catch (error) {
+        console.error("Failed to update session title:", error)
+        return false
+    }
+}
+
 // Enforce max sessions limit
 export async function enforceSessionLimit(): Promise<void> {
     const count = await getSessionCount()
