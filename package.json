@@ -65,7 +65,7 @@
         "@radix-ui/react-tooltip": "^1.1.8",
         "@radix-ui/react-use-controllable-state": "^1.2.2",
         "@xmldom/xmldom": "^0.9.8",
-        "ai": "^6.0.1",
+        "ai": "^6.0.175",
         "base-64": "^1.0.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
