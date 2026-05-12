@@ -13,6 +13,12 @@ import {
     setUserLocale,
     updatePreset,
 } from "./config-manager"
+import {
+    clearDataPath,
+    getDataPath,
+    isCustomDataPath,
+    setDataPath,
+} from "./data-path"
 import { restartNextServer } from "./next-server"
 import {
     applyProxyToEnv,
@@ -281,5 +287,52 @@ export function registerIpcHandlers(): void {
                         : "Failed to set locale",
             }
         }
+    })
+
+    // ==================== Data Path ====================
+
+    ipcMain.handle("get-data-path", () => {
+        return {
+            dataPath: getDataPath(),
+            isCustom: isCustomDataPath(),
+        }
+    })
+
+    ipcMain.handle("set-data-path", (_event, newPath: string) => {
+        if (!newPath || typeof newPath !== "string") {
+            return { success: false, error: "Invalid path" }
+        }
+
+        const saved = setDataPath(newPath)
+        if (!saved) {
+            return {
+                success: false,
+                error: "Failed to save data path setting",
+            }
+        }
+
+        return {
+            success: true,
+            message: "Data path updated. Restart the app to apply.",
+        }
+    })
+
+    ipcMain.handle("reset-data-path", () => {
+        clearDataPath()
+        return {
+            success: true,
+            message: "Data path reset to default. Restart the app to apply.",
+        }
+    })
+
+    ipcMain.handle("dialog-browse-directory", async () => {
+        const result = await dialog.showOpenDialog({
+            properties: ["openDirectory"],
+            title: "Select Data Storage Directory",
+        })
+        if (result.canceled || result.filePaths.length === 0) {
+            return null
+        }
+        return result.filePaths[0]
     })
 }

@@ -33,7 +33,9 @@ const deleteConfirmBtn = document.getElementById("delete-confirm-btn")
 // Initialize
 document.addEventListener("DOMContentLoaded", async () => {
     await loadPresets()
+    await loadDataPath()
     setupEventListeners()
+    setupDataPathListeners()
 })
 
 // Load presets from main process
@@ -309,4 +311,116 @@ function escapeHtml(text) {
     const div = document.createElement("div")
     div.textContent = text
     return div.innerHTML
+}
+
+// ==================== Data Path Management ====================
+
+let currentDataPath = ""
+let isCustomPath = false
+let pendingDataPath = ""
+const dataPathInput = document.getElementById("data-path-input")
+const browsePathBtn = document.getElementById("browse-path-btn")
+const savePathBtn = document.getElementById("save-path-btn")
+const resetPathBtn = document.getElementById("reset-path-btn")
+const pathStatus = document.getElementById("data-path-status")
+const pathRestartNotice = document.getElementById("path-restart-notice")
+
+async function loadDataPath() {
+    try {
+        const result = await window.settingsAPI.getDataPath()
+        currentDataPath = result.dataPath
+        isCustomPath = result.isCustom
+        dataPathInput.value = currentDataPath
+        if (isCustomPath) {
+            pathStatus.textContent = "Custom path (set via settings)"
+            pathStatus.className = "path-status custom"
+        }
+    } catch (error) {
+        console.error("Failed to load data path:", error)
+    }
+}
+
+function setupDataPathListeners() {
+    browsePathBtn.addEventListener("click", async () => {
+        try {
+            const dir = await window.settingsAPI.browseDirectory()
+            if (dir) {
+                dataPathInput.value = dir
+                pendingDataPath = dir
+                pathRestartNotice.style.display = "none"
+            }
+        } catch (error) {
+            console.error("Failed to browse directory:", error)
+            showToast("Failed to browse directory", "error")
+        }
+    })
+
+    savePathBtn.addEventListener("click", async () => {
+        const path = dataPathInput.value.trim()
+        if (!path) {
+            showToast("Please enter a data path", "error")
+            return
+        }
+
+        try {
+            savePathBtn.disabled = true
+            savePathBtn.innerHTML = '<span class="loading"></span>'
+
+            const result = await window.settingsAPI.setDataPath(path)
+            if (result.success) {
+                currentDataPath = path
+                isCustomPath = true
+                pendingDataPath = ""
+                pathRestartNotice.style.display = "block"
+                showToast(
+                    "Data path saved. Restart the app to apply.",
+                    "success",
+                )
+            } else {
+                showToast(result.error || "Failed to save data path", "error")
+            }
+        } catch (error) {
+            console.error("Failed to save data path:", error)
+            showToast("Failed to save data path", "error")
+        } finally {
+            savePathBtn.disabled = false
+            savePathBtn.textContent = "Save Data Path"
+        }
+    })
+
+    resetPathBtn.addEventListener("click", async () => {
+        try {
+            resetPathBtn.disabled = true
+            resetPathBtn.innerHTML = '<span class="loading"></span>'
+
+            const result = await window.settingsAPI.resetDataPath()
+            if (result.success) {
+                currentDataPath = ""
+                isCustomPath = false
+                dataPathInput.value = ""
+                pendingDataPath = ""
+                pathStatus.textContent = ""
+                pathStatus.className = "path-status"
+                pathRestartNotice.style.display = "block"
+                showToast(
+                    "Data path reset. Restart the app to apply.",
+                    "success",
+                )
+            } else {
+                showToast(result.error || "Failed to reset data path", "error")
+            }
+        } catch (error) {
+            console.error("Failed to reset data path:", error)
+            showToast("Failed to reset data path", "error")
+        } finally {
+            resetPathBtn.disabled = false
+            resetPathBtn.textContent = "Reset to Default"
+        }
+    })
+
+    // Update pending path when user types
+    dataPathInput.addEventListener("input", () => {
+        pendingDataPath = dataPathInput.value.trim()
+        pathRestartNotice.style.display = "none"
+    })
 }

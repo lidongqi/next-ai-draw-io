@@ -1,6 +1,14 @@
 "use client"
 
-import { ChevronRight, Github, Info, Moon, Sun, Tag } from "lucide-react"
+import {
+    ChevronRight,
+    FolderOpen,
+    Github,
+    Info,
+    Moon,
+    Sun,
+    Tag,
+} from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -133,6 +141,12 @@ function SettingsContent({
     const [httpsProxy, setHttpsProxy] = useState("")
     const [isApplyingProxy, setIsApplyingProxy] = useState(false)
 
+    // Data path state (Electron only)
+    const [dataPath, setDataPath] = useState("")
+    const [isCustomDataPath, setIsCustomDataPath] = useState(false)
+    const [isSavingDataPath, setIsSavingDataPath] = useState(false)
+    const [showRestartNotice, setShowRestartNotice] = useState(false)
+
     useEffect(() => {
         // Only fetch if not cached in localStorage
         if (getStoredAccessCodeRequired() !== null) return
@@ -196,6 +210,14 @@ function SettingsContent({
                 window.electronAPI.getProxy().then((config) => {
                     setHttpProxy(config.httpProxy || "")
                     setHttpsProxy(config.httpsProxy || "")
+                })
+            }
+
+            // Load data path (Electron only)
+            if (window.electronAPI?.getDataPath) {
+                window.electronAPI.getDataPath().then((result) => {
+                    setDataPath(result.dataPath || "")
+                    setIsCustomDataPath(result.isCustom)
                 })
             }
         }
@@ -300,6 +322,65 @@ function SettingsContent({
             toast.error("Failed to apply proxy settings")
         } finally {
             setIsApplyingProxy(false)
+        }
+    }
+
+    const handleBrowseDataPath = async () => {
+        if (!window.electronAPI?.browseDirectory) return
+        try {
+            const dir = await window.electronAPI.browseDirectory()
+            if (dir) {
+                setDataPath(dir)
+                setShowRestartNotice(false)
+            }
+        } catch {
+            toast.error("Failed to browse directory")
+        }
+    }
+
+    const handleSaveDataPath = async () => {
+        if (!window.electronAPI?.setDataPath) return
+        const trimmedPath = dataPath.trim()
+        if (!trimmedPath) {
+            toast.error(dict.settings.dataPathRequired)
+            return
+        }
+
+        setIsSavingDataPath(true)
+        try {
+            const result = await window.electronAPI.setDataPath(trimmedPath)
+            if (result.success) {
+                setIsCustomDataPath(true)
+                setShowRestartNotice(true)
+                toast.success(dict.settings.dataPathSaved)
+            } else {
+                toast.error(result.error || dict.settings.dataPathSaveFailed)
+            }
+        } catch {
+            toast.error(dict.settings.dataPathSaveFailed)
+        } finally {
+            setIsSavingDataPath(false)
+        }
+    }
+
+    const handleResetDataPath = async () => {
+        if (!window.electronAPI?.resetDataPath) return
+
+        setIsSavingDataPath(true)
+        try {
+            const result = await window.electronAPI.resetDataPath()
+            if (result.success) {
+                setDataPath("")
+                setIsCustomDataPath(false)
+                setShowRestartNotice(true)
+                toast.success(dict.settings.dataPathResetDone)
+            } else {
+                toast.error(result.error || dict.settings.dataPathSaveFailed)
+            }
+        } catch {
+            toast.error(dict.settings.dataPathSaveFailed)
+        } finally {
+            setIsSavingDataPath(false)
         }
     }
 
@@ -653,6 +734,82 @@ function SettingsContent({
                                         ? "..."
                                         : dict.settings.applyProxy}
                                 </Button>
+                            </div>
+                        )}
+
+                    {/* Data Storage Path - Electron only */}
+                    {typeof window !== "undefined" &&
+                        window.electronAPI?.isElectron && (
+                            <div className="py-4 space-y-3">
+                                <div className="space-y-0.5">
+                                    <Label className="text-sm font-medium">
+                                        {dict.settings.dataPath}
+                                    </Label>
+                                    <p className="text-xs text-muted-foreground">
+                                        {dict.settings.dataPathDescription}
+                                    </p>
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <Input
+                                        id="data-path"
+                                        type="text"
+                                        value={dataPath}
+                                        onChange={(e) => {
+                                            setDataPath(e.target.value)
+                                            setShowRestartNotice(false)
+                                        }}
+                                        placeholder={
+                                            dict.settings.dataPathPlaceholder
+                                        }
+                                        className="h-9"
+                                    />
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={handleBrowseDataPath}
+                                        className="h-9 w-9 shrink-0 rounded-xl"
+                                        aria-label={
+                                            dict.settings.dataPathBrowse
+                                        }
+                                    >
+                                        <FolderOpen className="h-4 w-4" />
+                                    </Button>
+                                </div>
+
+                                {isCustomDataPath && (
+                                    <p className="text-xs text-primary">
+                                        {dict.settings.dataPathCustom}
+                                    </p>
+                                )}
+
+                                <div className="flex gap-2">
+                                    <Button
+                                        onClick={handleSaveDataPath}
+                                        disabled={
+                                            isSavingDataPath || !dataPath.trim()
+                                        }
+                                        className="h-9 px-4 rounded-xl flex-1"
+                                    >
+                                        {isSavingDataPath
+                                            ? "..."
+                                            : dict.settings.dataPathSave}
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleResetDataPath}
+                                        disabled={isSavingDataPath}
+                                        className="h-9 px-4 rounded-xl flex-1"
+                                    >
+                                        {dict.settings.dataPathReset}
+                                    </Button>
+                                </div>
+
+                                {showRestartNotice && (
+                                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                                        {dict.settings.dataPathRestart}
+                                    </p>
+                                )}
                             </div>
                         )}
                 </div>

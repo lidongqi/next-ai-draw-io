@@ -30,6 +30,12 @@ contextBridge.exposeInMainWorld("settingsAPI", {
     // Apply a preset (sets environment variables and restarts server)
     applyPreset: (id: string) => ipcRenderer.invoke("config-presets:apply", id),
 
+    // Data path management
+    getDataPath: () => ipcRenderer.invoke("get-data-path"),
+    setDataPath: (path: string) => ipcRenderer.invoke("set-data-path", path),
+    resetDataPath: () => ipcRenderer.invoke("reset-data-path"),
+    browseDirectory: () => ipcRenderer.invoke("dialog-browse-directory"),
+
     // Close settings window
     close: () => ipcRenderer.send("settings:close"),
 })

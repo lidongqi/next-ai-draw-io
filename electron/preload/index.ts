@@ -31,4 +31,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getUserLocale: () => ipcRenderer.invoke("get-user-locale"),
     setUserLocale: (locale: string) =>
         ipcRenderer.invoke("set-user-locale", locale),
+
+    // Data path management
+    getDataPath: () => ipcRenderer.invoke("get-data-path"),
+    setDataPath: (path: string) => ipcRenderer.invoke("set-data-path", path),
+    resetDataPath: () => ipcRenderer.invoke("reset-data-path"),
+    browseDirectory: () => ipcRenderer.invoke("dialog-browse-directory"),
 })

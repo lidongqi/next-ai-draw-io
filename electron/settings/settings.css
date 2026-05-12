@@ -342,3 +342,67 @@ h2 {
     margin-top: 8px;
     font-size: 14px;
 }
+
+/* Data Path Section */
+.section-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    line-height: 1.4;
+}
+
+.path-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.path-input-row input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 13px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.path-input-row .btn {
+    padding: 10px 14px;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.path-status {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.path-status.custom {
+    color: var(--accent-color);
+}
+
+.path-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.path-notice {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: #856404;
+    font-size: 13px;
+    text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+    .path-notice {
+        background-color: #332701;
+        border-color: #665200;
+        color: #ffc107;
+    }
+}

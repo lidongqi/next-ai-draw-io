@@ -1,6 +1,7 @@
 import { app, BrowserWindow, dialog, shell } from "electron"
 import { buildAppMenu } from "./app-menu"
 import { getCurrentPresetEnv } from "./config-manager"
+import { initDataPath } from "./data-path"
 import { loadEnvFile } from "./env-loader"
 import { registerIpcHandlers } from "./ipc-handlers"
 import { startNextServer, stopNextServer } from "./next-server"
@@ -21,6 +22,9 @@ if (!gotTheLock) {
             mainWindow.focus()
         }
     })
+
+    // Initialize data path (must be first, before any userData access)
+    initDataPath()
 
     // Load environment variables from .env files
     loadEnvFile()

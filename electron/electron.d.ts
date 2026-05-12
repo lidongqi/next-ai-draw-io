@@ -44,6 +44,19 @@ interface SetUserLocaleResult {
     error?: string
 }
 
+/** Result of getting data path */
+interface GetDataPathResult {
+    dataPath: string
+    isCustom: boolean
+}
+
+/** Result of setting data path */
+interface SetDataPathResult {
+    success: boolean
+    message?: string
+    error?: string
+}
+
 declare global {
     interface Window {
         /** Main window Electron API */
@@ -74,6 +87,14 @@ declare global {
             >
             /** Set user's preferred locale */
             setUserLocale: (locale: string) => Promise<SetUserLocaleResult>
+            /** Get current data path */
+            getDataPath: () => Promise<GetDataPathResult>
+            /** Set a custom data path (requires restart) */
+            setDataPath: (path: string) => Promise<SetDataPathResult>
+            /** Reset data path to default (requires restart) */
+            resetDataPath: () => Promise<SetDataPathResult>
+            /** Open a directory picker dialog */
+            browseDirectory: () => Promise<string | null>
         }
 
         /** Settings window Electron API */
@@ -94,6 +115,14 @@ declare global {
             deletePreset: (id: string) => Promise<boolean>
             /** Apply a preset (sets environment variables and restarts server) */
             applyPreset: (id: string) => Promise<ApplyPresetResult>
+            /** Get current data path */
+            getDataPath: () => Promise<GetDataPathResult>
+            /** Set a custom data path (requires restart) */
+            setDataPath: (path: string) => Promise<SetDataPathResult>
+            /** Reset data path to default (requires restart) */
+            resetDataPath: () => Promise<SetDataPathResult>
+            /** Open a directory picker dialog */
+            browseDirectory: () => Promise<string | null>
             /** Close settings window */
             close: () => void
         }
@@ -106,4 +135,6 @@ export type {
     ProxyConfig,
     SetProxyResult,
     SetUserLocaleResult,
+    GetDataPathResult,
+    SetDataPathResult,
 }

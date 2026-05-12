@@ -18,6 +18,26 @@
         <h1>Configuration Presets</h1>
 
         <div class="section">
+            <h2>Data Storage Path</h2>
+            <p class="section-desc">
+                All application data (chat sessions, configs, templates) is stored in this directory.
+                Changing the path requires restarting the app.
+            </p>
+            <div class="path-input-row">
+                <input type="text" id="data-path-input" placeholder="Default system path" />
+                <button id="browse-path-btn" class="btn btn-secondary" title="Browse for directory">Browse...</button>
+            </div>
+            <div id="data-path-status" class="path-status"></div>
+            <div class="path-actions">
+                <button id="save-path-btn" class="btn btn-primary">Save Data Path</button>
+                <button id="reset-path-btn" class="btn btn-secondary">Reset to Default</button>
+            </div>
+            <div id="path-restart-notice" class="path-notice" style="display: none;">
+                Data path updated. Restart the app to apply changes.
+            </div>
+        </div>
+
+        <div class="section">
             <h2>Presets</h2>
             <div id="preset-list" class="preset-list">
                 <!-- Presets will be loaded here -->
